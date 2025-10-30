@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome Messages - Modly</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="topnav">
+      <div class="nav-left">
+        <img src="https://i.postimg.cc/RCG8vFvL/Untitled-design-16.png" class="nav-logo" />
+        <h2>Modly Dashboard</h2>
+      </div>
+
+      <div class="nav-right" onclick="toggleUserMenu()">
+        <img
+          src="<%= user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png' %>"
+          class="user-pfp"
+        />
+        <span class="username"><%= user.username %></span>
+        <div class="user-menu" id="userMenu">
+          <a href="/guilds">Servers</a>
+          <a href="#">Billing</a>
+          <a href="/logout" class="logout">Logout</a>
+        </div>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <h3>Modules</h3>
+      <a href="/dashboard/<%= guild.id %>/modules/welcome">Welcome</a>
+      <a href="/dashboard/<%= guild.id %>/modules/sticky">Sticky Messages</a>
+      <a href="/dashboard/<%= guild.id %>/modules/builder">Message Builder</a>
+    </aside>
+
+    <main class="dashboard-content">
+      <h1 class="dashboard-header">Welcome Messages</h1>
+      <p class="dashboard-subtext">
+        Customize and send automated welcome messages for new members.
+      </p>
+
+      <form id="welcomeForm" class="builder-form">
+        <label>Message:</label>
+        <textarea name="message" id="message" placeholder="Welcome to the server!" required></textarea>
+        <button type="submit" class="preview-btn">Send</button>
+      </form>
+    </main>
+
+    <script>
+      async function sendMessage(event) {
+        event.preventDefault();
+        const msg = document.getElementById("message").value;
+
+        await fetch("/api/welcome/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ guildId: "<%= guild.id %>", message: msg }),
+        });
+
+        alert("Message sent!");
+      }
+      document.getElementById("welcomeForm").addEventListener("submit", sendMessage);
+
+      function toggleUserMenu() {
+        document.getElementById("userMenu").classList.toggle("active");
+      }
+    </script>
+  </body>
+</html>
+
+
+
+

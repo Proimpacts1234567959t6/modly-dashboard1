@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modly Dashboard</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <!-- HEADER -->
+    <header class="topnav">
+      <div class="nav-left">
+        <img
+          src="https://i.postimg.cc/RCG8vFvL/Untitled-design-16.png"
+          class="nav-logo"
+          alt="Modly Logo"
+        />
+        <h2>Modly Dashboard</h2>
+      </div>
+
+      <div class="nav-right" onclick="toggleUserMenu()">
+        <img
+          src="<%= user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png' %>"
+          class="user-pfp"
+          alt="User Avatar"
+        />
+        <span class="username"><%= user.username %></span>
+
+        <div class="user-menu" id="userMenu">
+          <a href="/guilds">Servers</a>
+          <a href="#">Billing</a>
+          <a href="/logout" class="logout">Logout</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <h3>Modules</h3>
+      <a href="/dashboard/<%= guild.id %>/modules/welcome">Welcome</a>
+      <a href="/dashboard/<%= guild.id %>/modules/sticky">Sticky Messages</a>
+      <a href="/dashboard/<%= guild.id %>/modules/builder">Message Builder</a>
+    </aside>
+
+    <!-- DASHBOARD MAIN -->
+    <main class="dashboard-content">
+      <h1 class="dashboard-header">Welcome, <%= user.username %></h1>
+      <p class="dashboard-subtext">
+        Manage your server modules below — all currently in preview mode.
+      </p>
+
+      <div class="modules-grid">
+        <div class="module-card">
+          <h3>Welcome Messages</h3>
+          <p>Send customized greetings to new members joining your server.</p>
+          <a
+            href="/dashboard/<%= guild.id %>/modules/welcome"
+            class="preview-btn"
+            >Preview Only</a
+          >
+        </div>
+
+        <div class="module-card">
+          <h3>Sticky Messages</h3>
+          <p>Keep an important message at the top of chat channels automatically.</p>
+          <a
+            href="/dashboard/<%= guild.id %>/modules/sticky"
+            class="preview-btn"
+            >Preview Only</a
+          >
+        </div>
+
+        <div class="module-card">
+          <h3>Message Builder</h3>
+          <p>Create rich embed messages with titles, colors, and buttons.</p>
+          <a
+            href="/dashboard/<%= guild.id %>/modules/builder"
+            class="preview-btn"
+            >Preview Only</a
+          >
+        </div>
+      </div>
+    </main>
+
+    <script>
+      function toggleUserMenu() {
+        document.getElementById("userMenu").classList.toggle("active");
+      }
+    </script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+

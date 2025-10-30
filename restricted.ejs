@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Restricted Access - Modly</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="restricted-wrapper">
+      <div class="restricted-box">
+        <% if (guild && guild.icon) { %>
+          <img
+            src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png?size=128"
+            alt="Guild Icon"
+            class="restricted-icon"
+          />
+        <% } %>
+        <h1>Restricted Area</h1>
+        <p>
+          You do not have permission to access
+          <strong><%= guild.name || 'this server' %></strong>.
+        </p>
+        <p>Please log in with the account that owns or manages this server.</p>
+        <a href="/auth/discord" class="retry-btn">Log in with a different account</a>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Select a Server - Modly</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <!-- Top Navigation -->
+    <header class="topnav">
+      <div class="nav-left">
+        <img
+          src="https://i.postimg.cc/RCG8vFvL/Untitled-design-16.png"
+          class="nav-logo"
+          alt="Modly"
+        />
+        <h2>Modly Dashboard</h2>
+      </div>
+
+      <div class="nav-right" onclick="toggleUserMenu()">
+        <img
+          src="<%= user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png' %>"
+          class="user-pfp"
+        />
+        <span class="username"><%= user.username %></span>
+
+        <div class="user-menu" id="userMenu">
+          <a href="/guilds">Servers</a>
+          <a href="#">Billing</a>
+          <a href="/logout" class="logout">Logout</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Guild Selection -->
+    <section class="guilds-section">
+      <h1>Select a Server</h1>
+      <p class="subtext">Only servers you own or manage are displayed below.</p>
+
+      <div class="guilds-grid">
+        <% guilds.forEach(g => { %>
+          <a href="/dashboard/<%= g.id %>" class="guild-card">
+            <img
+              src="<%= g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128` : 'https://cdn.discordapp.com/embed/avatars/1.png' %>"
+              alt="Guild Icon"
+            />
+            <div class="guild-name">
+              <%= g.name.length > 20 ? g.name.substring(0, 20) + '…' : g.name %>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+
+    <script>
+      function toggleUserMenu() {
+        document.getElementById("userMenu").classList.toggle("active");
+      }
+    </script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+

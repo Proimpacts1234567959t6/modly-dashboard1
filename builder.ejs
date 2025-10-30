@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Message Builder - Modly</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topnav">
+    <div class="nav-left">
+      <img src="https://i.postimg.cc/RCG8vFvL/Untitled-design-16.png" class="nav-logo" />
+      <h2>Modly Dashboard</h2>
+    </div>
+    <div class="nav-right" onclick="toggleUserMenu()">
+      <img
+        src="<%= user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png' %>"
+        class="user-pfp"
+      />
+      <span class="username"><%= user.username %></span>
+      <div class="user-menu" id="userMenu">
+        <a href="/guilds">Servers</a>
+        <a href="#">Billing</a>
+        <a href="/logout" class="logout">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <h3>Modules</h3>
+    <a href="/dashboard/<%= guild.id %>/modules/welcome">Welcome</a>
+    <a href="/dashboard/<%= guild.id %>/modules/sticky">Sticky</a>
+    <a href="/dashboard/<%= guild.id %>/modules/builder" class="active">Message Builder</a>
+  </aside>
+
+  <main class="dashboard-content">
+    <h1 class="dashboard-header">Message Builder</h1>
+    <p class="dashboard-subtext">Design and send rich messages with embeds to your Discord channels.</p>
+
+    <div class="builder-container">
+      <div class="builder-form">
+        <label>Channel</label>
+        <div class="channel-select-container">
+          <select id="channelSelect" class="input-field">
+            <option>Loading channels...</option>
+          </select>
+          <button id="refreshChannels" class="refresh-btn">⟳</button>
+        </div>
+
+        <label>Message Content</label>
+        <textarea id="content" class="input-field" placeholder="Write your message content here..." oninput="updatePreview()"></textarea>
+
+        <h3>Embeds</h3>
+        <div id="embedsContainer"></div>
+
+        <button type="button" class="preview-btn" onclick="addEmbed()">➕ Add Embed</button>
+        <button type="button" class="preview-btn" style="margin-top:10px" onclick="sendMessage()">🚀 Send Message</button>
+      </div>
+
+      <div class="builder-preview">
+        <h3 style="color:#4cc6fa;margin-bottom:10px;">Live Preview</h3>
+        <div id="previewMessage"></div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const guildId = "<%= guild.id %>";
+    let embeds = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchChannels();
+      document.getElementById("refreshChannels").addEventListener("click", fetchChannels);
+    });
+
+    async function fetchChannels() {
+      const select = document.getElementById("channelSelect");
+      select.innerHTML = "<option>Loading channels...</option>";
+      try {
+        const res = await fetch(`/api/channels/${guildId}`, { cache: "no-store" });
+        if (!res.ok) {
+          const t = await res.text();
+          throw new Error(`HTTP ${res.status} ${t}`);
+        }
+        const channels = await res.json();
+        select.innerHTML = "";
+        if (!Array.isArray(channels) || channels.length === 0) {
+          select.innerHTML = "<option disabled>No text channels found</option>";
+          return;
+        }
+        channels.forEach(c => {
+          const opt = document.createElement("option");
+          opt.value = c.id;
+          opt.textContent = `#${c.name}`;
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        console.error("fetchChannels error:", err);
+        select.innerHTML = "<option disabled>Error loading channels (check bot perms)</option>";
+      }
+    }
+
+    function addEmbed() {
+      const id = Date.now();
+      embeds.push({
+        id,
+        title: "",
+        description: "",
+        color: "#4cc6fa",
+        footer: "",
+        thumbnail: "",
+        image: "",
+      });
+      renderEmbeds();
+    }
+
+    function removeEmbed(id) {
+      embeds = embeds.filter(e => e.id !== id);
+      renderEmbeds();
+    }
+
+    function updateEmbed(id, field, value) {
+      const e = embeds.find(x => x.id === id);
+      if (e) e[field] = value;
+      updatePreview();
+    }
+
+    function renderEmbeds() {
+      const container = document.getElementById("embedsContainer");
+      container.innerHTML = "";
+      embeds.forEach(e => {
+        const div = document.createElement("div");
+        div.classList.add("embed-editor");
+        div.innerHTML = `
+          <div class="embed-header">
+            <h4>Embed</h4>
+            <button class="remove-btn" onclick="removeEmbed(${e.id})">Remove</button>
+          </div>
+          <input type="text" class="input-field" placeholder="Title" value="${e.title}" oninput="updateEmbed(${e.id}, 'title', this.value)" />
+          <textarea class="input-field" placeholder="Description" oninput="updateEmbed(${e.id}, 'description', this.value)">${e.description}</textarea>
+          <label>Color:</label>
+          <input type="color" value="${e.color}" oninput="updateEmbed(${e.id}, 'color', this.value)" />
+          <input type="text" class="input-field" placeholder="Footer text" value="${e.footer}" oninput="updateEmbed(${e.id}, 'footer', this.value)" />
+          <input type="text" class="input-field" placeholder="Thumbnail URL" value="${e.thumbnail}" oninput="updateEmbed(${e.id}, 'thumbnail', this.value)" />
+          <input type="text" class="input-field" placeholder="Image URL" value="${e.image}" oninput="updateEmbed(${e.id}, 'image', this.value)" />
+        `;
+        container.appendChild(div);
+      });
+      updatePreview();
+    }
+
+    function formatDiscordMarkdown(text) {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.*?)\*/g, "<em>$1</em>")
+        .replace(/__(.*?)__/g, "<u>$1</u>")
+        .replace(/~~(.*?)~~/g, "<del>$1</del>")
+        .replace(/`([^`]+)`/g, "<code>$1</code>")
+        .replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>")
+        .replace(/^> (.*$)/gim, "<blockquote>$1</blockquote>");
+    }
+
+    function updatePreview() {
+      const preview = document.getElementById("previewMessage");
+      const content = document.getElementById("content").value;
+      let html = "";
+      if (content.trim()) {
+        html += `<div class='discord-message'>${formatDiscordMarkdown(content)}</div>`;
+      }
+      embeds.forEach(e => {
+        html += `
+          <div class="embed-card" style="border-left:4px solid ${e.color}">
+            ${e.title ? `<div class="embed-title">${formatDiscordMarkdown(e.title)}</div>` : ""}
+            ${e.description ? `<div class="embed-description">${formatDiscordMarkdown(e.description)}</div>` : ""}
+            ${e.thumbnail ? `<img src='${e.thumbnail}' class='embed-thumbnail'/>` : ""}
+            ${e.image ? `<img src='${e.image}' class='embed-image'/>` : ""}
+            ${e.footer ? `<div class='embed-footer'>${formatDiscordMarkdown(e.footer)}</div>` : ""}
+          </div>`;
+      });
+      preview.innerHTML = html;
+    }
+
+    async function sendMessage() {
+      const channelId = document.getElementById("channelSelect").value;
+      const content = document.getElementById("content").value;
+      const payload = { channelId, content, embeds };
+
+      try {
+        const res = await fetch("/api/sendMessage", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const t = await res.text();
+        if (!res.ok) {
+          console.error("sendMessage error:", res.status, t);
+          showToast("Failed to send message. Check bot permissions.", "error");
+          return;
+        }
+        showToast("Message sent successfully!", "success");
+      } catch (e) {
+        console.error(e);
+        showToast("Network error.", "error");
+      }
+    }
+
+    function showToast(msg, type) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.className = `toast ${type}`;
+      toast.style.display = "block";
+      setTimeout(() => (toast.style.display = "none"), 3000);
+    }
+
+    function toggleUserMenu() {
+      document.getElementById("userMenu").classList.toggle("active");
+    }
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
