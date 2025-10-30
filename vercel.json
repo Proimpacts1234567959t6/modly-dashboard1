@@ -13,11 +13,10 @@
     }
   ],
   "env": {
-    "BOT_TOKEN": "@bot_token",
-    "CLIENT_ID": "@client_id",
-    "CLIENT_SECRET": "@client_secret",
-    "REDIRECT_URI": "@redirect_uri",
-    "SESSION_SECRET": "@session_secret"
-  }
-}
+    "BOT_TOKEN": "BOT_TOKEN",
+    "CLIENT_ID": "CLIENT_ID",
+    "CLIENT_SECRET": "CLIENT_SECRET",
+    "REDIRECT_URI": "REDIRECT_URI",
+    "SESSION_SECRET": "SESSION_SECRET"
+
 
